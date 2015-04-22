@@ -28,13 +28,15 @@ public class Downloader{
 			workerCreator.execute(
 					new Worker(entry.getKey(), destination, entry.getValue()));
 		}
+		while(!workerCreator.isQuiescent());
+		workerCreator.shutdownNow();
 	}
 
 	private class Worker extends RecursiveAction {
 		private String fileURL, filename;
 		private Path fileDestination;
 
-		public Worker(String fileURL, String fileDestination, String filename){
+		public Worker(String filename, String fileDestination, String fileURL){
 			this.fileURL = fileURL;
 			this.fileDestination = Paths.get(fileDestination);
 			this.filename = filename;
@@ -42,7 +44,7 @@ public class Downloader{
 
 		public void compute(){
 			if(Files.exists(fileDestination)&& Files.isDirectory(fileDestination)
-					&& Files.exists(Paths.get(destination + filename))){
+					&& !Files.exists(Paths.get(destination + filename))){
 				try {
 					URL website = new URL(fileURL);
 					ReadableByteChannel rbc = Channels.newChannel(website.openStream());

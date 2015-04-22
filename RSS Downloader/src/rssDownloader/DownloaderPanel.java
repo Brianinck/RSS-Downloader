@@ -1,6 +1,9 @@
 package rssDownloader;
 
 import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -13,19 +16,21 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class DownloaderPanel extends JPanel{
-	JLabel invalidURL, invalidDestination;
 	JPanel panel = new JPanel();
 	JTextField urlBox, directoryBox;
-	JButton downloadButton, directoryButton;
+	JButton downloadButton, directoryButton, closeButton;
 	JComboBox fileTypes;
 	JFileChooser directorySelector;
 	Listener listener = new Listener();
@@ -33,35 +38,51 @@ public class DownloaderPanel extends JPanel{
 	String destination = null;
 	
 	public DownloaderPanel(){
-		//panel.add(new JLabel("Download from RSS Feed."));
-		panel.add(new JLabel("Enter url of RSS Feed: "));
+		panel.setLayout(new GridBagLayout());
 		
+		addItem(new JLabel("Enter url of RSS Feed: "), 0, 0, 1, 1, GridBagConstraints.EAST);
 		urlBox = new JTextField(25);
-		invalidURL = new JLabel();
-		panel.add(urlBox);
-		panel.add(invalidURL);
+		addItem(urlBox, 1, 0, 2, 1, GridBagConstraints.WEST);
 		
-		panel.add(new JLabel("Enter destination directory: "));
+		addItem(new JLabel("Enter destination directory: "), 0, 2, 1, 1, GridBagConstraints.EAST);
 		
 		directoryBox = new JTextField(25);
-		invalidDestination = new JLabel();
-		panel.add(directoryBox);
-		panel.add(invalidDestination);
+		addItem(directoryBox, 1, 2, 1, 1, GridBagConstraints.WEST);
 		
 		directoryButton = new JButton("Browse");
 		directoryButton.addActionListener(listener);
-		panel.add(directoryButton);
+		addItem(directoryButton, 2, 2, 1, 1, GridBagConstraints.WEST);
 		
+		addItem(new JLabel("Choose file type: "), 0, 4, 1, 1, GridBagConstraints.EAST);
 		fileTypes = new JComboBox(acceptedTypes);
-		panel.add(fileTypes);
+		addItem(fileTypes, 1, 4, 1, 1, GridBagConstraints.WEST);
 
+		Box buttonBox = Box.createHorizontalBox();
+		closeButton = new JButton("Close");
+		closeButton.addActionListener(listener);
 		downloadButton = new JButton("Download");
 		downloadButton.addActionListener(listener);
-		panel.add(downloadButton);
+		buttonBox.add(downloadButton);
+		buttonBox.add(buttonBox.createHorizontalStrut(20));
+		buttonBox.add(closeButton);
+		addItem(buttonBox, 1, 5, 1, 1, GridBagConstraints.NORTH);
 	}
 	
 	public JPanel getPanel(){
 		return panel;
+	}
+	
+	private void addItem(JComponent c, int x, int y, int width, int height, int align){
+		GridBagConstraints gc = new GridBagConstraints();
+		gc.gridx = x;
+		gc.gridy = y;
+		gc.gridheight = height;
+		gc.weightx = 100.0;
+		gc.weighty = 100.0;
+		gc.insets = new Insets(5, 5, 5, 5);
+		gc.anchor = align;
+		gc.fill = GridBagConstraints.NONE;
+		panel.add(c, gc);
 	}
 	
 	private class Listener extends JFrame implements ActionListener{
@@ -72,6 +93,8 @@ public class DownloaderPanel extends JPanel{
 				download();
 			else if(action.getSource() == directoryButton)
 				selectDirectory();
+			else if(action.getSource() == closeButton)
+				close();
 		}
 		
 		private void download(){
@@ -82,18 +105,10 @@ public class DownloaderPanel extends JPanel{
 				Downloader downloader = new Downloader(destination);
 				downloader.download(filesSources);
 			} else {
-				if(!validator.isValidURL(url)){
-					invalidURL.setText("Please enter a valid url.");
-					invalidURL.setForeground(Color.red);
-				} else {
-					invalidURL.setText(""); //Clear and previous errors
-				}
-				if(!validator.isValidDirectory(destination)){
-					invalidDestination.setText("Please select a valid directory.");
-					invalidDestination.setForeground(Color.red);
-				} else {
-					invalidDestination.setText("");
-				}
+				if(!validator.isValidURL(url))
+					JOptionPane.showMessageDialog(new JFrame(), "Please enter a valid url.");
+				else if(!validator.isValidDirectory(destination))
+					JOptionPane.showMessageDialog(new JFrame(), "Please select a valid directory.");
 			}
 		}
 
@@ -126,9 +141,13 @@ public class DownloaderPanel extends JPanel{
 			directorySelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int result = directorySelector.showOpenDialog(null);
 			if(result == JFileChooser.APPROVE_OPTION){
-				destination = directorySelector.getSelectedFile().getAbsolutePath();
+				destination = directorySelector.getSelectedFile().getAbsolutePath() + "/";
 				directoryBox.setText(destination);
 			}
+		}
+		
+		private void close(){
+			System.exit(0);
 		}
 	}
 }
