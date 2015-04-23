@@ -41,9 +41,9 @@ public class DownloaderPanel extends JPanel{
 	JComboBox fileTypes;
 	JFileChooser directorySelector;
 	JSpinner numDownloads;
-	JTable downloadsTable;
+	//JTable downloadsTable;
 	Listener listener = new Listener();
-	DefaultTableModel downloads;
+	UpdateTableModel downloads;
 	String[] acceptedTypes = {"mp3", "zip", "mp4", "wav", "wma"};
 	String destination = null;
 
@@ -52,6 +52,9 @@ public class DownloaderPanel extends JPanel{
 		
 		JComponent mainTab = makeMainPanel();
 		tabs.addTab("RSS tab", null, mainTab, "Set url and destination folder");
+		
+		JComponent downloadsTab = makeDownloadsPanel();
+		tabs.addTab("Downloads", null, downloadsTab, "Current and pending downloads");
 		
 		panel.add(tabs);
 	}
@@ -106,12 +109,17 @@ public class DownloaderPanel extends JPanel{
 		return mainPanel;
 	}
 	
-	private void makeDownloadPanel(){
-		downloads = new DefaultTableModel();
-		downloads.addColumn("File Name");
+	private JComponent makeDownloadsPanel(){
+		JPanel downloadsPanel = new JPanel(false);
+		downloads = new UpdateTableModel();
+	/*	downloads.addColumn("File Name");
 		downloads.addColumn("Status");
-		downloads.addColumn("Progress");
+		downloads.addColumn("Progress"); */
 		JTable table = new JTable(downloads);
+		table.getColumn("Progress").setCellRenderer(new ProgressCellRenderer());
+//		table.getColumn("Status").setCellRenderer(new ProgressCellRenderer());
+		addItem(downloadsPanel, table, 0, 0, 1, 1, GridBagConstraints.EAST);
+		return downloadsPanel;
 	}
 
 	private void addItem(JPanel p, JComponent c, int x, int y, int width, int height, int align){
