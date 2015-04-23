@@ -18,4 +18,8 @@ public class Validator {
 		}
 		return false;
 	}
+	
+	public boolean isValidDownloadNum(int num){
+		return num > 0;
+	}
 }

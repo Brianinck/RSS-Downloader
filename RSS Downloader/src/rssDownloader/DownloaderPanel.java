@@ -25,7 +25,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.table.DefaultTableModel;
 
 public class DownloaderPanel extends JPanel{
 	JPanel panel = new JPanel();
@@ -33,30 +40,59 @@ public class DownloaderPanel extends JPanel{
 	JButton downloadButton, directoryButton, closeButton;
 	JComboBox fileTypes;
 	JFileChooser directorySelector;
+	JSpinner numDownloads;
+	JTable downloadsTable;
 	Listener listener = new Listener();
+	DefaultTableModel downloads;
 	String[] acceptedTypes = {"mp3", "zip", "mp4", "wav", "wma"};
 	String destination = null;
-	
-	public DownloaderPanel(){
-		panel.setLayout(new GridBagLayout());
-		
-		addItem(new JLabel("Enter url of RSS Feed: "), 0, 0, 1, 1, GridBagConstraints.EAST);
-		urlBox = new JTextField(25);
-		addItem(urlBox, 1, 0, 2, 1, GridBagConstraints.WEST);
-		
-		addItem(new JLabel("Enter destination directory: "), 0, 2, 1, 1, GridBagConstraints.EAST);
-		
-		directoryBox = new JTextField(25);
-		addItem(directoryBox, 1, 2, 1, 1, GridBagConstraints.WEST);
-		
-		directoryButton = new JButton("Browse");
-		directoryButton.addActionListener(listener);
-		addItem(directoryButton, 2, 2, 1, 1, GridBagConstraints.WEST);
-		
-		addItem(new JLabel("Choose file type: "), 0, 4, 1, 1, GridBagConstraints.EAST);
-		fileTypes = new JComboBox(acceptedTypes);
-		addItem(fileTypes, 1, 4, 1, 1, GridBagConstraints.WEST);
 
+	public DownloaderPanel(){
+		JTabbedPane tabs = new JTabbedPane();
+		
+		JComponent mainTab = makeMainPanel();
+		tabs.addTab("RSS tab", null, mainTab, "Set url and destination folder");
+		
+		panel.add(tabs);
+	}
+
+	public JPanel getPanel(){
+		return panel;
+	}
+
+	private JComponent makeMainPanel(){
+		JPanel mainPanel = new JPanel(false);
+		mainPanel.setLayout(new GridBagLayout());
+
+		//url option
+		addItem(mainPanel, new JLabel("Enter url of RSS Feed: "), 0, 0, 1, 1,
+				GridBagConstraints.EAST);
+		urlBox = new JTextField(25);
+		addItem(mainPanel, urlBox, 1, 0, 2, 1, GridBagConstraints.WEST);
+
+		//download path
+		addItem(mainPanel, new JLabel("Enter destination directory: "), 0, 2,
+				1, 1, GridBagConstraints.EAST);
+		directoryBox = new JTextField(25);
+		addItem(mainPanel, directoryBox, 1, 2, 1, 1, GridBagConstraints.WEST);
+		directoryButton = new JButton("Select Path");
+		directoryButton.addActionListener(listener);
+		addItem(mainPanel, directoryButton, 2, 2, 1, 1, GridBagConstraints.WEST);
+
+		//filetype dropdown
+		addItem(mainPanel, new JLabel("Choose file type: "), 0, 4, 1, 1,
+				GridBagConstraints.EAST);
+		fileTypes = new JComboBox(acceptedTypes);
+		addItem(mainPanel, fileTypes, 1, 4, 1, 1, GridBagConstraints.WEST);
+		
+		//number of parallel downloads
+		addItem(mainPanel, new JLabel("Number of parallel downloads: "), 0, 5, 1, 1,
+				GridBagConstraints.EAST);
+		SpinnerModel restraints = new SpinnerNumberModel(5, 1, 10, 1);
+		numDownloads = new JSpinner(restraints);
+		addItem(mainPanel, numDownloads, 1, 5, 1, 1, GridBagConstraints.WEST);
+		
+		//download and close buttons
 		Box buttonBox = Box.createHorizontalBox();
 		closeButton = new JButton("Close");
 		closeButton.addActionListener(listener);
@@ -65,14 +101,20 @@ public class DownloaderPanel extends JPanel{
 		buttonBox.add(downloadButton);
 		buttonBox.add(buttonBox.createHorizontalStrut(20));
 		buttonBox.add(closeButton);
-		addItem(buttonBox, 1, 5, 1, 1, GridBagConstraints.NORTH);
+		addItem(mainPanel, buttonBox, 1, 6, 1, 1, GridBagConstraints.NORTH);
+		
+		return mainPanel;
 	}
 	
-	public JPanel getPanel(){
-		return panel;
+	private void makeDownloadPanel(){
+		downloads = new DefaultTableModel();
+		downloads.addColumn("File Name");
+		downloads.addColumn("Status");
+		downloads.addColumn("Progress");
+		JTable table = new JTable(downloads);
 	}
-	
-	private void addItem(JComponent c, int x, int y, int width, int height, int align){
+
+	private void addItem(JPanel p, JComponent c, int x, int y, int width, int height, int align){
 		GridBagConstraints gc = new GridBagConstraints();
 		gc.gridx = x;
 		gc.gridy = y;
@@ -82,12 +124,12 @@ public class DownloaderPanel extends JPanel{
 		gc.insets = new Insets(5, 5, 5, 5);
 		gc.anchor = align;
 		gc.fill = GridBagConstraints.NONE;
-		panel.add(c, gc);
+		p.add(c, gc);
 	}
-	
+
 	private class Listener extends JFrame implements ActionListener{
 		private Validator validator = new Validator();
-		
+
 		public void actionPerformed(ActionEvent action){
 			if(action.getSource() == downloadButton)
 				download();
@@ -96,19 +138,23 @@ public class DownloaderPanel extends JPanel{
 			else if(action.getSource() == closeButton)
 				close();
 		}
-		
+
 		private void download(){
 			String url = urlBox.getText();
-			if(validator.isValidURL(url) && validator.isValidDirectory(destination)){
+			int numParrallelDownloads = (int) numDownloads.getValue();
+			if(validator.isValidURL(url) && validator.isValidDirectory(destination)
+					&& validator.isValidDownloadNum(numParrallelDownloads)){
 				String fileType = (String) fileTypes.getSelectedItem();
 				HashMap<String, String> filesSources = parseHTML(url, fileType);
-				Downloader downloader = new Downloader(destination);
+				Downloader downloader = new Downloader(destination, numParrallelDownloads, downloads);
 				downloader.download(filesSources);
 			} else {
 				if(!validator.isValidURL(url))
 					JOptionPane.showMessageDialog(new JFrame(), "Please enter a valid url.");
 				else if(!validator.isValidDirectory(destination))
 					JOptionPane.showMessageDialog(new JFrame(), "Please select a valid directory.");
+				else if(!validator.isValidDownloadNum(numParrallelDownloads))
+					JOptionPane.showMessageDialog(new JFrame(), "Number of parrallel downloads must be greater than 0.");
 			}
 		}
 
@@ -134,7 +180,7 @@ public class DownloaderPanel extends JPanel{
 				return filesAndSources;
 			}
 		}
-		
+
 		private void selectDirectory(){
 			directorySelector = new JFileChooser();
 			directorySelector.setFileHidingEnabled(true);
@@ -145,7 +191,7 @@ public class DownloaderPanel extends JPanel{
 				directoryBox.setText(destination);
 			}
 		}
-		
+
 		private void close(){
 			System.exit(0);
 		}
