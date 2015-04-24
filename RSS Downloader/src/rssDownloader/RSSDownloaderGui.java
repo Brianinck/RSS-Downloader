@@ -34,7 +34,6 @@ public class RSSDownloaderGui extends JFrame{
 	public RSSDownloaderGui(){
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("RSS Downloader");
-		this.setLocationRelativeTo(null);
 		
 		optionsPanel = makeMainPanel();
 		downloadsPanel = makeDownloadsPanel();
@@ -44,6 +43,7 @@ public class RSSDownloaderGui extends JFrame{
 		
 		this.add(pages);
 		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
 	
@@ -55,29 +55,29 @@ public class RSSDownloaderGui extends JFrame{
 		addItem(mainPanel, new JLabel("Enter url of RSS Feed: "), 0, 0, 1, 1,
 				GridBagConstraints.EAST);
 		urlBox = new JTextField(25);
-		addItem(mainPanel, urlBox, 1, 0, 2, 1, GridBagConstraints.WEST);
+		addItem(mainPanel, urlBox, 1, 0, 1, 1, GridBagConstraints.WEST);
 
 		//download path
-		addItem(mainPanel, new JLabel("Enter destination directory: "), 0, 2,
+		addItem(mainPanel, new JLabel("Enter destination directory: "), 0, 1,
 				1, 1, GridBagConstraints.EAST);
 		directoryBox = new JTextField(25);
-		addItem(mainPanel, directoryBox, 1, 2, 1, 1, GridBagConstraints.WEST);
+		addItem(mainPanel, directoryBox, 1, 1, 1, 1, GridBagConstraints.WEST);
 		directoryButton = new JButton("Select Path");
 		directoryButton.addActionListener(listener);
-		addItem(mainPanel, directoryButton, 2, 2, 1, 1, GridBagConstraints.WEST);
+		addItem(mainPanel, directoryButton, 2, 1, 1, 1, GridBagConstraints.WEST);
 
 		//filetype dropdown
-		addItem(mainPanel, new JLabel("Choose file type: "), 0, 4, 1, 1,
-				GridBagConstraints.EAST);
+		addItem(mainPanel, new JLabel("Choose file type: "), 0, 2, 1, 1,
+				GridBagConstraints.WEST);
 		fileTypes = new JComboBox(acceptedTypes);
-		addItem(mainPanel, fileTypes, 1, 4, 1, 1, GridBagConstraints.WEST);
+		addItem(mainPanel, fileTypes, 0, 2, 1, 1, GridBagConstraints.EAST);
 		
 		//number of parallel downloads
-		addItem(mainPanel, new JLabel("Number of parallel downloads: "), 0, 5, 1, 1,
+		addItem(mainPanel, new JLabel("Number of parallel downloads: "), 1, 2, 1, 1,
 				GridBagConstraints.EAST);
-		SpinnerModel restraints = new SpinnerNumberModel(5, 1, 10, 1);
+		SpinnerModel restraints = new SpinnerNumberModel(5, 1, 15, 1);
 		numDownloads = new JSpinner(restraints);
-		addItem(mainPanel, numDownloads, 1, 5, 1, 1, GridBagConstraints.WEST);
+		addItem(mainPanel, numDownloads, 2, 2, 1, 1, GridBagConstraints.WEST);
 		
 		//download and close buttons
 		Box buttonBox = Box.createHorizontalBox();
@@ -88,7 +88,7 @@ public class RSSDownloaderGui extends JFrame{
 		buttonBox.add(downloadButton);
 		buttonBox.add(buttonBox.createHorizontalStrut(20));
 		buttonBox.add(closeButton);
-		addItem(mainPanel, buttonBox, 1, 6, 1, 1, GridBagConstraints.NORTH);
+		addItem(mainPanel, buttonBox, 2, 3, 1, 1, GridBagConstraints.SOUTHEAST);
 		
 		return mainPanel;
 	}

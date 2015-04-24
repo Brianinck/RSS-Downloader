@@ -4,6 +4,7 @@ import java.io.File;
 
 public class Validator {
 
+	//TODO: this doesn't work
 	public boolean isValidURL(String url){
 		String urlRegex = "\\b(https?|ftp|file|ldap)://" + "[-A-Za-z0-9+&@#/%?=~_|!:,.;]"
 				+ "*[-A-Za-z0-9+&@#/%=~_|]";
