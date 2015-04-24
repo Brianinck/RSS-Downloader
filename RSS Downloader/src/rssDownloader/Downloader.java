@@ -4,39 +4,34 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
 
-import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
-import javax.swing.table.DefaultTableModel;
 
-public class Downloader{
+public class Downloader implements Runnable{
 	private String destination;
 	private int NUM_CONCURRENT_DOWNLOADS;
 	private ForkJoinPool workerCreator;
 	private UpdateTableModel table;
+	private HashMap<String, String> filesSources;
 
-	public Downloader(String destination, int numParrallelDownloads, UpdateTableModel table){
+	public Downloader(String destination, int numParrallelDownloads, UpdateTableModel table, HashMap<String, String> filesSources){
 		this.destination = destination;
 		this.NUM_CONCURRENT_DOWNLOADS = numParrallelDownloads;
 		this.table = table;
+		this.filesSources = filesSources;
 	}
 
-	public void download(HashMap<String, String> filesSources){
+	public void run(){
 		workerCreator = new ForkJoinPool(NUM_CONCURRENT_DOWNLOADS);
 		for(Entry<String, String> entry: filesSources.entrySet()){
-			table.addRow(entry.getKey(), "Pending", 0);
 			workerCreator.execute(
 					new Worker(entry.getKey(), destination, entry.getValue(), table));
 		}
@@ -54,44 +49,45 @@ public class Downloader{
 			this.fileDestination = Paths.get(fileDestination);
 			this.filename = filename;
 			this.model = model;
-
+			
 			addPropertyChangeListener(new PropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
-					if (evt.getPropertyName().equals("progress")) {
-						System.out.println("YAY");
-						Worker.this.model.updateProgress(filename, (int) evt.getNewValue());
-					} else if(evt.getPropertyName().equals("Status")){
-						System.out.println("YAY2");
-						Worker.this.model.updateStatus(filename, (String)evt.getNewValue());
-					}
-				}
-			});
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (evt.getPropertyName().equals("progress")) {
+                        Worker.this.model.updateProgress(filename, (int) evt.getNewValue());
+                    }
+                }
+            });
 		}
 
+		@SuppressWarnings("finally")
 		@Override
-		protected Void doInBackground() throws Exception {
+		public Void doInBackground() {
 			if(Files.exists(fileDestination)&& Files.isDirectory(fileDestination)
 					&& !Files.exists(Paths.get(destination + filename))){
-	//			model.updateStatus(filename, "Downloading");
-				URL website = new URL(fileURL);
-				long downloaded = 0;
-				int fileSize = website.openConnection().getContentLength();
-				int read;
-				byte data[] = new byte[1024];
-				InputStream toGet = new BufferedInputStream(website.openStream());
-				FileOutputStream file = new FileOutputStream(destination + filename);
-				while((read = toGet.read(data)) != -1){
-					downloaded += read;
-					int progress = (int) Math.round(((double) downloaded / (double) fileSize) * 100d);
-		//			model.updateProgress(this.filename, progress);
-					setProgress(progress);
-					file.write(data);
+				URL website;
+				try {
+					model.updateStatus(filename, "Downloading");
+					website = new URL(fileURL);
+					long downloaded = 0;
+					int fileSize = website.openConnection().getContentLength();
+					int read;
+					byte data[] = new byte[1024];
+					InputStream toGet = new BufferedInputStream(website.openStream());
+					FileOutputStream file = new FileOutputStream(destination + filename);
+					while((read = toGet.read(data)) != -1){
+						downloaded += read;
+						int progress = (int) Math.round(((double) downloaded / (double) fileSize) * 100d);
+						model.updateProgress(filename, progress);
+						file.write(data);
+					}
+				} catch(Exception ignore){
+				} finally {
+					model.updateProgress(filename, 100);
+					model.updateStatus(filename, "Finished");
+					return null;
 				}
 			}
-			setProgress(100);
-//			model.updateProgress(filename, 100);
-	//		model.updateStatus(filename, "Complete");
 			return null;
 		}
 	}

@@ -4,72 +4,81 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
+import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
 
-public class UpdateTableModel extends AbstractTableModel{
-	List<RowData> rows = new ArrayList<RowData>();
-	Map<String, RowData> lookup = new HashMap<String, RowData>();
+public class UpdateTableModel extends AbstractTableModel {
+	// holds the strings to be displayed in the column headers of our table
+	private final String[] columnNames = {"Filename", "Status", "Progress"};
 
-	@Override
-	public int getRowCount() {
-		return rows.size();
+	// holds the data types for all our columns
+	private final Class[] columnClasses = {String.class, String.class, JProgressBar.class};
+
+	// holds our data
+	private List<RowData> rows = new ArrayList<RowData>();
+	private Map<String, RowData> lookup = new HashMap<String, RowData>();
+
+	// adds a row
+	public void addDownload(RowData d) {
+		rows.add(d);
+		lookup.put(d.getName(), d);
+
+		// the table model is interested in changes of the rows
+		fireTableRowsInserted(rows.size()-1, rows.size()-1);
 	}
 
-	@Override
+	// is called by a download object when its state changes
+	public void update(Observable observable, Object o) {
+		int index = rows.indexOf(o);
+		if (index != -1)
+			fireTableRowsUpdated(index, index);
+	}
+
 	public int getColumnCount() {
 		return 3;
 	}
 
-	public String getColumnName(int col){
+	public int getRowCount() {
+		return rows.size();
+	}
+
+	public String getColumnName(int col) {
+		return columnNames[col];
+	}
+
+	public Class getColumnClass(int c) {
+		return columnClasses[c];
+	}
+
+	public Object getValueAt(int row, int col) {
+		RowData download = rows.get(row);
 		switch(col){
 		case 0:
-			return "File Name";
+			return download.getName();
 		case 1:
-			return "Status";
+			return download.getStatus();
 		case 2:
-			return "Progress";
+			return download.getProgress();
+		default:
+			return null;
 		}
-		return "";
 	}
 
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		RowData row = rows.get(rowIndex);
-		switch(columnIndex){
-		case 0:
-			return row.getName();
-		case 1:
-			return row.getStatus();
-		case 2:
-			return row.getProgress();
-		}
-		return null;
-	}
-
-	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 		RowData rowData = rows.get(rowIndex);
 		switch (columnIndex) {
 		case 1:
-			if(aValue instanceof String){
+			if(aValue instanceof String)
 				rowData.setStatus((String)aValue);
-				break;
-			}
+			break;
 		case 2:
-			if (aValue instanceof Float) {
+			if (aValue instanceof Float)
 				rowData.setProgress((float) aValue);
-			}
 			break;
 		}
 	}
-	
-	public void addRow(String filename, String status, float progress) {
-        RowData rowData = new RowData(filename, status, progress);
-        lookup.put(filename, rowData);
-        rows.add(rowData);
-        fireTableRowsInserted(rows.size() - 1, rows.size() - 1);
-    }
 	
 	protected void updateProgress(String filename, int progress) {
         RowData rowData = lookup.get(filename);
@@ -83,11 +92,15 @@ public class UpdateTableModel extends AbstractTableModel{
 	
 	protected void updateStatus(String filename, String status){
 		RowData rowData = lookup.get(filename);
-        if (rowData != null) {
-            int row = rows.indexOf(rowData);
+		if (rowData != null) {
+			int row = rows.indexOf(rowData);
             setValueAt(status, row, 1);
             fireTableCellUpdated(row, 1);
         }
+	}
+
+	public boolean isCellEditable(int row, int col) {
+		return false;
 	}
 
 }

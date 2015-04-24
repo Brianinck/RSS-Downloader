@@ -1,6 +1,8 @@
 package rssDownloader;
 
-public class RowData {
+import java.util.Observable;
+
+public class RowData extends Observable{
 	private String name, status;
 	private float progress;
 	
@@ -28,5 +30,9 @@ public class RowData {
 	
 	public void setProgress(float progress){
 		this.progress = progress;
+		setChanged();
+		notifyObservers(this);
 	}
+	
+	
 }
