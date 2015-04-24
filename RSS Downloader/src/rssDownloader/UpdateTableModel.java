@@ -11,10 +11,10 @@ import javax.swing.table.AbstractTableModel;
 
 public class UpdateTableModel extends AbstractTableModel {
 	// holds the strings to be displayed in the column headers of our table
-	private final String[] columnNames = {"Filename", "Status", "Progress"};
+	private final String[] columnNames = {"Filename", "File Size", "Status", "Progress"};
 
 	// holds the data types for all our columns
-	private final Class[] columnClasses = {String.class, String.class, JProgressBar.class};
+	private final Class[] columnClasses = {String.class, String.class, String.class, JProgressBar.class};
 
 	// holds our data
 	private List<RowData> rows = new ArrayList<RowData>();
@@ -37,7 +37,7 @@ public class UpdateTableModel extends AbstractTableModel {
 	}
 
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	public int getRowCount() {
@@ -58,8 +58,10 @@ public class UpdateTableModel extends AbstractTableModel {
 		case 0:
 			return download.getName();
 		case 1:
-			return download.getStatus();
+			return download.getFileSize();
 		case 2:
+			return download.getStatus();
+		case 3:
 			return download.getProgress();
 		default:
 			return null;
@@ -71,9 +73,13 @@ public class UpdateTableModel extends AbstractTableModel {
 		switch (columnIndex) {
 		case 1:
 			if(aValue instanceof String)
-				rowData.setStatus((String)aValue);
+				rowData.setFileSize((String) aValue);
 			break;
 		case 2:
+			if(aValue instanceof String)
+				rowData.setStatus((String)aValue);
+			break;
+		case 3:
 			if (aValue instanceof Float)
 				rowData.setProgress((float) aValue);
 			break;
@@ -85,8 +91,8 @@ public class UpdateTableModel extends AbstractTableModel {
         if (rowData != null) {
             int row = rows.indexOf(rowData);
             float p = (float) progress / 100f;
-            setValueAt(p, row, 2);
-            fireTableCellUpdated(row, 2);
+            setValueAt(p, row, 3);
+            fireTableCellUpdated(row, 3);
         }
     }
 	
@@ -94,7 +100,16 @@ public class UpdateTableModel extends AbstractTableModel {
 		RowData rowData = lookup.get(filename);
 		if (rowData != null) {
 			int row = rows.indexOf(rowData);
-            setValueAt(status, row, 1);
+            setValueAt(status, row, 2);
+            fireTableCellUpdated(row, 2);
+        }
+	}
+	
+	protected void updateFileSize(String filename, int size){
+		RowData rowData = lookup.get(filename);
+		if (rowData != null) {
+			int row = rows.indexOf(rowData);
+            setValueAt(size+" MB", row, 1);
             fireTableCellUpdated(row, 1);
         }
 	}

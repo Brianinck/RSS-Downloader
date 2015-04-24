@@ -99,7 +99,7 @@ public class RSSDownloaderGui extends JFrame{
 		JTable table = new JTable(downloads);
 		table.getColumn("Progress").setCellRenderer(new ProgressCellRenderer(0, 100));
 		JScrollPane scrollPane = new JScrollPane(table);
-		addItem(downloadsPanel, scrollPane, 0, 0, 1, 1, GridBagConstraints.EAST);
+		downloadsPanel.add(scrollPane);
 		return downloadsPanel;
 	}
 
@@ -163,7 +163,7 @@ public class RSSDownloaderGui extends JFrame{
 					Matcher foundFile = filePattern.matcher(htmlLine);
 					if(foundFile.find()){
 						filesAndSources.put(foundFile.group(1), foundFile.group(0));
-						downloads.addDownload(new RowData(foundFile.group(1), "Pending", 0));
+						downloads.addDownload(new RowData(foundFile.group(1), "Pending", 0, "Pending"));
 					}
 				}
 			} catch (MalformedURLException e) {

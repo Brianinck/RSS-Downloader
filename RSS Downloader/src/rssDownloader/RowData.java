@@ -1,15 +1,14 @@
 package rssDownloader;
 
-import java.util.Observable;
-
-public class RowData extends Observable{
-	private String name, status;
+public class RowData{
+	private String name, status, fileSize;
 	private float progress;
 	
-	public RowData(String filename, String status, float progress){
+	public RowData(String filename, String status, float progress, String fileSize){
 		this.name = filename;
 		this.status = status;
 		this.progress = progress;
+		this.fileSize = fileSize;
 	}
 	
 	public String getName(){
@@ -24,14 +23,20 @@ public class RowData extends Observable{
 		return this.progress;
 	}
 	
+	public String getFileSize(){
+		return this.fileSize;
+	}
+	
 	public void setStatus(String status){
 		this.status = status;
 	}
 	
+	public void setFileSize(String size){
+		this.fileSize = size;
+	}
+	
 	public void setProgress(float progress){
 		this.progress = progress;
-		setChanged();
-		notifyObservers(this);
 	}
 	
 	

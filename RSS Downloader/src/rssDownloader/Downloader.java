@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 public class Downloader implements Runnable{
@@ -37,6 +39,7 @@ public class Downloader implements Runnable{
 		}
 		while(!workerCreator.isQuiescent());
 		workerCreator.shutdownNow();
+		JOptionPane.showMessageDialog(new JFrame(), "All downloads finished!");
 	}
 
 	private class Worker extends SwingWorker<Void, Void> {
@@ -71,6 +74,7 @@ public class Downloader implements Runnable{
 					website = new URL(fileURL);
 					long downloaded = 0;
 					int fileSize = website.openConnection().getContentLength();
+					model.updateFileSize(filename, fileSize / 1048576);
 					int read;
 					byte data[] = new byte[1024];
 					InputStream toGet = new BufferedInputStream(website.openStream());
