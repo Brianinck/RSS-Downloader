@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 public class Validator {
 
-	//TODO: this doesn't work
 	public boolean isValidURL(String url){
 		Pattern p = Pattern.compile("(@)?(href=')?(HREF=')?(HREF=\")?(href=\")?(https?://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?");
 		Matcher m = p.matcher(url);
