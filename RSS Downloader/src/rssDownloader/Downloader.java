@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
@@ -69,6 +70,8 @@ public class Downloader implements Runnable{
 			if(Files.exists(fileDestination)&& Files.isDirectory(fileDestination)
 					&& !Files.exists(Paths.get(destination + filename))){
 				URL website;
+				InputStream toGet = null;
+				FileOutputStream file = null;
 				try {
 					model.updateStatus(filename, "Downloading");
 					website = new URL(fileURL);
@@ -77,8 +80,8 @@ public class Downloader implements Runnable{
 					model.updateFileSize(filename, fileSize / 1048576);
 					int read;
 					byte data[] = new byte[1024];
-					InputStream toGet = new BufferedInputStream(website.openStream());
-					FileOutputStream file = new FileOutputStream(destination + filename);
+					toGet = new BufferedInputStream(website.openStream());
+					file = new FileOutputStream(destination + filename);
 					while((read = toGet.read(data)) != -1){
 						downloaded += read;
 						int progress = (int) Math.round(((double) downloaded / (double) fileSize) * 100d);
@@ -89,9 +92,22 @@ public class Downloader implements Runnable{
 				} finally {
 					model.updateProgress(filename, 100);
 					model.updateStatus(filename, "Finished");
+					if(toGet != null){
+						try {
+							toGet.close();
+						} catch (IOException ignore){}
+					}
+					if(file != null){
+						try {
+							file.close();
+						} catch (IOException ignore) {}
+					}
 					return null;
 				}
 			}
+			model.updateFileSize(filename, "Unkown");
+			model.updateProgress(filename, 100);
+			model.updateStatus(filename, "Skipped");
 			return null;
 		}
 	}

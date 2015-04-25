@@ -17,7 +17,7 @@ public class RSSDownloaderGui extends JFrame{
 	private JPanel downloadsPanel, optionsPanel, pages;
 	private JTextField urlBox, directoryBox;
 	private JButton downloadButton, directoryButton, closeButton;
-	private JComboBox fileTypes;
+	private JComboBox<String> fileTypes;
 	private JFileChooser directorySelector;
 	private JSpinner numDownloads;
 	private Listener listener = new Listener();
@@ -69,7 +69,7 @@ public class RSSDownloaderGui extends JFrame{
 		//filetype dropdown
 		addItem(mainPanel, new JLabel("Choose file type: "), 0, 2, 1, 1,
 				GridBagConstraints.WEST);
-		fileTypes = new JComboBox(acceptedTypes);
+		fileTypes = new JComboBox<String>(acceptedTypes);
 		addItem(mainPanel, fileTypes, 0, 2, 1, 1, GridBagConstraints.EAST);
 		
 		//number of parallel downloads
@@ -77,18 +77,14 @@ public class RSSDownloaderGui extends JFrame{
 				GridBagConstraints.EAST);
 		SpinnerModel restraints = new SpinnerNumberModel(5, 1, 15, 1);
 		numDownloads = new JSpinner(restraints);
-		addItem(mainPanel, numDownloads, 2, 2, 1, 1, GridBagConstraints.WEST);
+		addItem(mainPanel, numDownloads, 2, 2, 1, 1, GridBagConstraints.CENTER);
 		
 		//download and close buttons
 		Box buttonBox = Box.createHorizontalBox();
-		closeButton = new JButton("Close");
-		closeButton.addActionListener(listener);
 		downloadButton = new JButton("Download");
 		downloadButton.addActionListener(listener);
 		buttonBox.add(downloadButton);
-		buttonBox.add(buttonBox.createHorizontalStrut(20));
-		buttonBox.add(closeButton);
-		addItem(mainPanel, buttonBox, 2, 3, 1, 1, GridBagConstraints.SOUTHEAST);
+		addItem(mainPanel, buttonBox, 2, 3, 1, 1, GridBagConstraints.SOUTH);
 		
 		return mainPanel;
 	}
@@ -124,8 +120,6 @@ public class RSSDownloaderGui extends JFrame{
 				download();
 			else if(action.getSource() == directoryButton)
 				selectDirectory();
-			else if(action.getSource() == closeButton)
-				close();
 		}
 
 		private void download(){
@@ -136,6 +130,9 @@ public class RSSDownloaderGui extends JFrame{
 				String fileType = (String) fileTypes.getSelectedItem();
 				HashMap<String, String> filesSources = parseHTML(url, fileType);
 				CardLayout layout = (CardLayout)pages.getLayout();
+				this.revalidate();
+				this.repaint();
+				this.pack();
 				layout.show(pages, DOWNLOADS);
 				Downloader downloader = new Downloader(destination, numParrallelDownloads, downloads, filesSources);
 				new Thread(downloader).start();
@@ -184,10 +181,6 @@ public class RSSDownloaderGui extends JFrame{
 				destination = directorySelector.getSelectedFile().getAbsolutePath() + "/";
 				directoryBox.setText(destination);
 			}
-		}
-
-		private void close(){
-			System.exit(0);
 		}
 	}
 }

@@ -113,6 +113,15 @@ public class UpdateTableModel extends AbstractTableModel {
             fireTableCellUpdated(row, 1);
         }
 	}
+	
+	protected void updateFileSize(String filename, String error){
+		RowData rowData = lookup.get(filename);
+		if (rowData != null) {
+			int row = rows.indexOf(rowData);
+            setValueAt(error, row, 1);
+            fireTableCellUpdated(row, 1);
+        }
+	}
 
 	public boolean isCellEditable(int row, int col) {
 		return false;
