@@ -53,15 +53,15 @@ public class Downloader implements Runnable{
 			this.fileDestination = Paths.get(fileDestination);
 			this.filename = filename;
 			this.model = model;
-			
+
 			addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (evt.getPropertyName().equals("progress")) {
-                        Worker.this.model.updateProgress(filename, (int) evt.getNewValue());
-                    }
-                }
-            });
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (evt.getPropertyName().equals("progress")) {
+						Worker.this.model.updateProgress(filename, (int) evt.getNewValue());
+					}
+				}
+			});
 		}
 
 		@SuppressWarnings("finally")
@@ -92,18 +92,18 @@ public class Downloader implements Runnable{
 				} finally {
 					model.updateProgress(filename, 100);
 					model.updateStatus(filename, "Finished");
-					if(toGet != null){
-						try {
+					try {
+						if(toGet != null)
 							toGet.close();
-						} catch (IOException ignore){}
-					}
-					if(file != null){
+					} catch (IOException ignore){}
+					finally{
 						try {
-							file.close();
-						} catch (IOException ignore) {}
+							if(file != null)
+								file.close();
+						}catch (IOException ignore) {}
 					}
-					return null;
 				}
+				return null;
 			}
 			model.updateFileSize(filename, "Unkown");
 			model.updateProgress(filename, 100);
@@ -112,3 +112,4 @@ public class Downloader implements Runnable{
 		}
 	}
 }
+
