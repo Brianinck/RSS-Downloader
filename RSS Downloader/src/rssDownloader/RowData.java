@@ -1,5 +1,6 @@
 package rssDownloader;
 
+//Taken from http://stackoverflow.com/a/13755155/2980766
 public class RowData{
 	private String name, status, fileSize;
 	private float progress;

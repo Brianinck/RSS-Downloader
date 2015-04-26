@@ -9,6 +9,11 @@ import java.util.Observable;
 import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
 
+/*Taken from
+ * http://stackoverflow.com/a/13755155/2980766
+ * and
+ * https://code.google.com/p/tc6project/source/browse/trunk/src/version2/outils/ProgressBarInTable.java?spec=svn71&r=60 
+ */
 public class UpdateTableModel extends AbstractTableModel {
 	// holds the strings to be displayed in the column headers of our table
 	private final String[] columnNames = {"Filename", "File Size", "Status", "Progress"};

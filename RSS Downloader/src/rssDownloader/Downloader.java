@@ -64,7 +64,6 @@ public class Downloader implements Runnable{
 			});
 		}
 
-		@SuppressWarnings("finally")
 		@Override
 		public Void doInBackground() {
 			if(Files.exists(fileDestination)&& Files.isDirectory(fileDestination)

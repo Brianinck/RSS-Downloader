@@ -28,6 +28,7 @@ public class ProgressCellRenderer extends JProgressBar implements TableCellRende
 		super(orient, min, max);
 	}
 	@Override
+	//Taken from http://stackoverflow.com/a/13755155/2980766
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		int progress = 0;
