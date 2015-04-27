@@ -22,7 +22,7 @@ public class RSSDownloaderGui extends JFrame{
 	private JSpinner numDownloads;
 	private Listener listener = new Listener();
 	private UpdateTableModel downloads;
-	private String[] acceptedTypes = {"mp3", "zip", "mp4", "wav", "wma"};
+	private String[] acceptedTypes = {"mp3", "zip", "mp4", "wav", "wma", "mkv"};
 	private String destination = null;
 	private final String MAIN = "main";
 	private final String DOWNLOADS = "downloads";
