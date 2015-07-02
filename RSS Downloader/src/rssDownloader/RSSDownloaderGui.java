@@ -75,8 +75,7 @@ public class RSSDownloaderGui extends JFrame{
 		//number of parallel downloads
 		addItem(mainPanel, new JLabel("Number of parallel downloads: "), 1, 2, 1, 1,
 				GridBagConstraints.EAST);
-		int num_processors = Runtime.getRuntime().availableProcessors();
-		SpinnerModel restraints = new SpinnerNumberModel(num_processors, 1, 15, 1);
+		SpinnerModel restraints = new SpinnerNumberModel(5, 1, 15, 1);
 		numDownloads = new JSpinner(restraints);
 		addItem(mainPanel, numDownloads, 2, 2, 1, 1, GridBagConstraints.CENTER);
 		
