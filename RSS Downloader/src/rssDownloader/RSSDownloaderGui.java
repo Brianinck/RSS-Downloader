@@ -1,10 +1,13 @@
 package rssDownloader;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.metal.OceanTheme;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -26,27 +29,27 @@ public class RSSDownloaderGui extends JFrame{
 	private String destination = null;
 	private final String MAIN = "main";
 	private final String DOWNLOADS = "downloads";
-	
+
 	public static void main(String[] args){
 		new RSSDownloaderGui();
 	}
-	
+
 	public RSSDownloaderGui(){
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("RSS Downloader");
-		
+
 		optionsPanel = makeMainPanel();
 		downloadsPanel = makeDownloadsPanel();
 		pages = new JPanel(new CardLayout());
 		pages.add(optionsPanel, MAIN);
 		pages.add(downloadsPanel, DOWNLOADS);
-		
+
 		this.add(pages);
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
-	
+
 	private JPanel makeMainPanel(){
 		JPanel mainPanel = new JPanel(false);
 		mainPanel.setLayout(new GridBagLayout());
@@ -71,24 +74,24 @@ public class RSSDownloaderGui extends JFrame{
 				GridBagConstraints.WEST);
 		fileTypes = new JComboBox<String>(acceptedTypes);
 		addItem(mainPanel, fileTypes, 0, 2, 1, 1, GridBagConstraints.EAST);
-		
+
 		//number of parallel downloads
 		addItem(mainPanel, new JLabel("Number of parallel downloads: "), 1, 2, 1, 1,
 				GridBagConstraints.EAST);
 		SpinnerModel restraints = new SpinnerNumberModel(5, 1, 15, 1);
 		numDownloads = new JSpinner(restraints);
 		addItem(mainPanel, numDownloads, 2, 2, 1, 1, GridBagConstraints.CENTER);
-		
+
 		//download and close buttons
 		Box buttonBox = Box.createHorizontalBox();
 		downloadButton = new JButton("Download");
 		downloadButton.addActionListener(listener);
 		buttonBox.add(downloadButton);
 		addItem(mainPanel, buttonBox, 2, 3, 1, 1, GridBagConstraints.SOUTH);
-		
+
 		return mainPanel;
 	}
-	
+
 	private JPanel makeDownloadsPanel(){
 		JPanel downloadsPanel = new JPanel(false);
 		downloads = new UpdateTableModel();
@@ -158,7 +161,7 @@ public class RSSDownloaderGui extends JFrame{
 				String htmlLine;
 				while((htmlLine = html.readLine()) != null){
 					Matcher foundFile = filePattern.matcher(htmlLine);
-					if(foundFile.find()){
+					if(foundFile.find() && !filesAndSources.containsKey(foundFile.group(1))){
 						filesAndSources.put(foundFile.group(1), foundFile.group(0));
 						downloads.addDownload(new RowData(foundFile.group(1), "Pending", 0, "Pending"));
 					}
@@ -178,7 +181,7 @@ public class RSSDownloaderGui extends JFrame{
 			directorySelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int result = directorySelector.showOpenDialog(null);
 			if(result == JFileChooser.APPROVE_OPTION){
-				destination = directorySelector.getSelectedFile().getAbsolutePath() + "/";
+				destination = directorySelector.getSelectedFile().getAbsolutePath() + File.separator;
 				directoryBox.setText(destination);
 			}
 		}
