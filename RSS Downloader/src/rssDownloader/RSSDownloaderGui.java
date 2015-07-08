@@ -127,6 +127,9 @@ public class RSSDownloaderGui extends JFrame{
 
 		private void download(){
 			String url = urlBox.getText();
+			destination = directoryBox.getText();
+			if(!destination.endsWith(File.separator))
+			    destination += File.separator;
 			int numParrallelDownloads = (int) numDownloads.getValue();
 			if(validator.isValidURL(url) && validator.isValidDirectory(destination)
 					&& validator.isValidDownloadNum(numParrallelDownloads)){
@@ -180,10 +183,8 @@ public class RSSDownloaderGui extends JFrame{
 			directorySelector.setFileHidingEnabled(true);
 			directorySelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int result = directorySelector.showOpenDialog(null);
-			if(result == JFileChooser.APPROVE_OPTION){
-				destination = directorySelector.getSelectedFile().getAbsolutePath() + File.separator;
-				directoryBox.setText(destination);
-			}
+			if(result == JFileChooser.APPROVE_OPTION)
+				directoryBox.setText(directorySelector.getSelectedFile().getAbsolutePath() + File.separator);
 		}
 	}
 }
